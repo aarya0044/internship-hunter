@@ -28,4 +28,9 @@ export interface Profile {
   exclude_keywords: string[];
   score_threshold: number;
   digest_min_score: number;
+  telegram_token?: string;
+  telegram_chat_id?: string;
+  subscription_expires_at?: string;
+  crawl_interval_hours?: number;
+  subscription_days?: number;
 }

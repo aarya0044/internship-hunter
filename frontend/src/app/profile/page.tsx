@@ -417,6 +417,90 @@ export default function ProfilePage() {
                   />
                 </div>
               </div>
+
+              {/* Custom Telegram Credentials (SaaS Alerts) */}
+              <div className="space-y-4 pt-4 border-t border-zinc-900">
+                <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Custom Telegram Bot Alerts</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-zinc-400">Custom Bot Token (Optional)</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 123456:ABC..."
+                      value={profile?.telegram_token || ""}
+                      onChange={(e) =>
+                        setProfile({ ...profile!, telegram_token: e.target.value })
+                      }
+                      className="w-full bg-zinc-900 text-xs border border-zinc-800 rounded-xl px-3 py-2.5 text-zinc-300 focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-zinc-400">Custom Chat ID (Optional)</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 987654321"
+                      value={profile?.telegram_chat_id || ""}
+                      onChange={(e) =>
+                        setProfile({ ...profile!, telegram_chat_id: e.target.value })
+                      }
+                      className="w-full bg-zinc-900 text-xs border border-zinc-800 rounded-xl px-3 py-2.5 text-zinc-300 focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+                <p className="text-[10px] text-zinc-650 leading-normal font-medium">
+                  Leave empty to use the system default bot. Setup your bot via @BotFather and retrieve chat ID via @userinfobot.
+                </p>
+              </div>
+
+              {/* Crawl Scheduler Subscription */}
+              <div className="space-y-4 pt-4 border-t border-zinc-900">
+                <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Crawl Subscription Scheduler</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-zinc-400">Extend Alerts (Days)</label>
+                    <select
+                      value={profile?.subscription_days || 0}
+                      onChange={(e) =>
+                        setProfile({ ...profile!, subscription_days: parseInt(e.target.value) || 0 })
+                      }
+                      className="w-full bg-zinc-900 text-xs border border-zinc-800 rounded-xl px-3 py-2.5 text-zinc-300 focus:outline-none focus:border-emerald-500 font-semibold"
+                    >
+                      <option value="0">Keep Existing Duration</option>
+                      <option value="7">Activate for 7 Days</option>
+                      <option value="14">Activate for 14 Days</option>
+                      <option value="30">Activate for 30 Days</option>
+                      <option value="90">Activate for 90 Days</option>
+                      <option value="-1">Cancel Active Subscription</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-zinc-400">Scan Interval</label>
+                    <select
+                      value={profile?.crawl_interval_hours || 4}
+                      onChange={(e) =>
+                        setProfile({ ...profile!, crawl_interval_hours: parseInt(e.target.value) || 4 })
+                      }
+                      className="w-full bg-zinc-900 text-xs border border-zinc-800 rounded-xl px-3 py-2.5 text-zinc-300 focus:outline-none focus:border-emerald-500 font-semibold"
+                    >
+                      <option value="2">Every 2 Hours</option>
+                      <option value="4">Every 4 Hours</option>
+                      <option value="8">Every 8 Hours</option>
+                      <option value="12">Every 12 Hours</option>
+                      <option value="24">Once a Day</option>
+                    </select>
+                  </div>
+                </div>
+                {profile?.subscription_expires_at ? (
+                  <div className="border border-emerald-500/10 bg-emerald-500/[0.02] p-3 rounded-xl text-[10px] text-emerald-400 font-semibold flex items-center gap-2">
+                    <Sparkles size={12} />
+                    <span>Crawl alerts active until {new Date(profile.subscription_expires_at).toLocaleDateString()} at {new Date(profile.subscription_expires_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                  </div>
+                ) : (
+                  <div className="border border-zinc-850 bg-zinc-950/20 p-3 rounded-xl text-[10px] text-zinc-500 font-semibold">
+                    No active automatic crawl subscription. Select a duration above to initiate recurring background scans.
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Right Side: Resume text box */}
