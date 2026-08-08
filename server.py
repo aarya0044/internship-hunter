@@ -185,7 +185,7 @@ def get_profile(user: User = Depends(get_current_user)):
 @app.post("/api/profile")
 def update_profile(profile: ProfileUpdate, user: User = Depends(get_current_user)):
     """Save/update search boundaries in database."""
-    from datetime import timedelta
+    from datetime import datetime, timezone, timedelta
     profile_dict = profile.model_dump()
     
     # Calculate subscription expiration date if days specified
