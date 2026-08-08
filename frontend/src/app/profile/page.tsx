@@ -10,6 +10,7 @@ import {
   User,
   Sliders,
   CheckCircle,
+  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import { Profile } from "../types";
