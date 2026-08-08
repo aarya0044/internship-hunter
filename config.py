@@ -48,15 +48,43 @@ DAILY_DIGEST_HOUR_UTC = int(os.getenv("DAILY_DIGEST_HOUR_UTC", 14))
 DATABASE_PATH = os.path.join(BASE_DIR, "internship_hunter.db")
 
 # --- Redis Message Broker ---
-_raw_redis = os.getenv("REDIS_URL", "").strip().strip('"').strip("'")
-if "ssl_cert_reqs=none" in _raw_redis.lower():
+def _normalize_redis_url(url: str) -> str:
+    if not url:
+        return "redis://127.0.0.1:6379/0"
+    
+    url = url.strip().strip('"').strip("'")
+    
+    # Normalize ssl_cert_reqs parameters to uppercase constants for Celery compatibility
     import re
-    REDIS_URL = re.sub(r"ssl_cert_reqs=[a-zA-Z_]+", "ssl_cert_reqs=CERT_NONE", _raw_redis, flags=re.IGNORECASE)
-elif _raw_redis.startswith("rediss://") and "ssl_cert_reqs" not in _raw_redis:
-    _sep = "&" if "?" in _raw_redis else "?"
-    REDIS_URL = f"{_raw_redis}{_sep}ssl_cert_reqs=CERT_NONE"
-else:
-    REDIS_URL = _raw_redis or "redis://127.0.0.1:6379/0"
+    if "ssl_cert_reqs=" in url.lower():
+        url = re.sub(r"ssl_cert_reqs=none", "ssl_cert_reqs=CERT_NONE", url, flags=re.IGNORECASE)
+        url = re.sub(r"ssl_cert_reqs=required", "ssl_cert_reqs=CERT_REQUIRED", url, flags=re.IGNORECASE)
+        url = re.sub(r"ssl_cert_reqs=optional", "ssl_cert_reqs=CERT_OPTIONAL", url, flags=re.IGNORECASE)
+    elif url.startswith("rediss://") and "ssl_cert_reqs" not in url:
+        _sep = "&" if "?" in url else "?"
+        url = f"{url}{_sep}ssl_cert_reqs=CERT_NONE"
+        
+    # Safely URL encode password if it contains special characters
+    from urllib.parse import urlparse, quote
+    try:
+        parsed = urlparse(url)
+        if parsed.password:
+            encoded_password = quote(parsed.password)
+            netloc = parsed.netloc
+            if parsed.username:
+                netloc = f"{parsed.username}:{encoded_password}@{parsed.hostname}"
+            else:
+                netloc = f"default:{encoded_password}@{parsed.hostname}"
+            if parsed.port:
+                netloc = f"{netloc}:{parsed.port}"
+            parsed = parsed._replace(netloc=netloc)
+            url = parsed.geturl()
+    except Exception:
+        pass
+        
+    return url
+
+REDIS_URL = _normalize_redis_url(os.getenv("REDIS_URL", ""))
 
 
 def validate():
