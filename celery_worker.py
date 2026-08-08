@@ -4,18 +4,30 @@ from celery import Celery
 import config
 from main import run_pipeline
 
+# Configure secure Redis SSL parameter if using rediss://
+redis_url = config.REDIS_URL
+if redis_url.startswith("rediss://") and "ssl_cert_reqs" not in redis_url:
+    separator = "&" if "?" in redis_url else "?"
+    redis_url = f"{redis_url}{separator}ssl_cert_reqs=none"
+
 # Initialize Celery app
 celery_app = Celery(
     "tasks",
-    broker=config.REDIS_URL,
-    backend=config.REDIS_URL
+    broker=redis_url,
+    backend=redis_url
 )
 
 # Celery Configuration
-celery_app.conf.update(
-    task_track_started=True,
-    task_time_limit=300,  # 5 minutes max
-)
+celery_opts = {
+    "task_track_started": True,
+    "task_time_limit": 300,  # 5 minutes max
+}
+
+if redis_url.startswith("rediss://"):
+    celery_opts["broker_use_ssl"] = {"ssl_cert_reqs": "none"}
+    celery_opts["redis_backend_use_ssl"] = {"ssl_cert_reqs": "none"}
+
+celery_app.conf.update(**celery_opts)
 
 
 @celery_app.task(bind=True)
