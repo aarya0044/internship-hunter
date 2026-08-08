@@ -19,6 +19,9 @@ from ai.scorer import _get_client_and_model
 
 app = FastAPI(title="Internship Hunter SaaS API", version="1.0.0")
 
+# Initialize database and tables on startup
+database.init_db()
+
 # CORS Setup
 app.add_middleware(
     CORSMiddleware,
