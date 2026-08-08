@@ -254,10 +254,12 @@ def get_status(user: User = Depends(get_current_user)):
     from celery_worker import celery_app
     from celery.result import AsyncResult
     active_task_id = active_tasks.get(user.id)
+    print(f"[status] active_task_id for user {user.id}: {active_task_id}")
     if not active_task_id:
         return {"is_crawling": False}
         
     res = AsyncResult(active_task_id, app=celery_app)
+    print(f"[status] task state in db for {active_task_id}: {res.state}")
     is_crawling = res.state in ("PENDING", "STARTED", "RETRY")
     return {"is_crawling": is_crawling}
 
