@@ -27,6 +27,8 @@ interface Insight {
   category: string;
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+
 export default function Dashboard() {
   const router = useRouter();
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -60,10 +62,10 @@ export default function Dashboard() {
     setLoading(true);
     try {
       const [jobsRes, insightsRes] = await Promise.all([
-        fetch("http://127.0.0.1:8000/api/jobs?limit=100", {
+        fetch(`${API_URL}/api/jobs?limit=100`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch("http://127.0.0.1:8000/api/insights", {
+        fetch(`${API_URL}/api/insights`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -107,7 +109,7 @@ export default function Dashboard() {
 
     const checkStatus = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:8000/api/status", {
+        const res = await fetch(`${API_URL}/api/status`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
@@ -172,7 +174,7 @@ export default function Dashboard() {
 
     const updatedStatus = !job.applied;
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/jobs/${job.id}/apply`, {
+      const res = await fetch(`${API_URL}/api/jobs/${job.id}/apply`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -198,7 +200,7 @@ export default function Dashboard() {
 
     setSaveStatus("Saving...");
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/jobs/${selectedJob.id}/draft`, {
+      const res = await fetch(`${API_URL}/api/jobs/${selectedJob.id}/draft`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

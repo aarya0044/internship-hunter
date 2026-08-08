@@ -14,6 +14,8 @@ import {
 import Link from "next/link";
 import { Profile } from "../types";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+
 export default function ProfilePage() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -42,10 +44,10 @@ export default function ProfilePage() {
     setLoading(true);
     try {
       const [profileRes, resumeRes] = await Promise.all([
-        fetch("http://127.0.0.1:8000/api/profile", {
+        fetch(`${API_URL}/api/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch("http://127.0.0.1:8000/api/resume", {
+        fetch(`${API_URL}/api/resume`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -97,7 +99,7 @@ export default function ProfilePage() {
 
     try {
       const [profileSave, resumeSave] = await Promise.all([
-        fetch("http://127.0.0.1:8000/api/profile", {
+        fetch(`${API_URL}/api/profile`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -105,7 +107,7 @@ export default function ProfilePage() {
           },
           body: JSON.stringify(profile),
         }),
-        fetch("http://127.0.0.1:8000/api/resume", {
+        fetch(`${API_URL}/api/resume`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

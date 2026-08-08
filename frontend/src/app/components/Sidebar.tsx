@@ -13,6 +13,8 @@ import {
   LogOut,
 } from "lucide-react";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -33,7 +35,7 @@ export default function Sidebar() {
 
     const checkStatus = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:8000/api/status", {
+        const res = await fetch(`${API_URL}/api/status`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.status === 401) {
@@ -66,7 +68,7 @@ export default function Sidebar() {
     setIsCrawling(true);
     setTriggerStatus("Triggering...");
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/run", {
+      const res = await fetch(`${API_URL}/api/run`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
