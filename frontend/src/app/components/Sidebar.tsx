@@ -46,6 +46,8 @@ export default function Sidebar() {
         if (res.ok) {
           const data = await res.json();
           setIsCrawling(data.is_crawling);
+          // Broadcast status globally to update page overlay
+          window.dispatchEvent(new CustomEvent("crawlerStatus", { detail: { isCrawling: data.is_crawling } }));
         }
       } catch (err) {
         console.error("Failed to connect to API status endpoint:", err);
@@ -66,6 +68,7 @@ export default function Sidebar() {
     }
 
     setIsCrawling(true);
+    window.dispatchEvent(new CustomEvent("crawlerStatus", { detail: { isCrawling: true } }));
     setTriggerStatus("Triggering...");
     try {
       const res = await fetch(`${API_URL}/api/run`, {
@@ -84,12 +87,14 @@ export default function Sidebar() {
         setTriggerStatus("Failed");
         setTimeout(() => setTriggerStatus(null), 3000);
         setIsCrawling(false);
+        window.dispatchEvent(new CustomEvent("crawlerStatus", { detail: { isCrawling: false } }));
       }
     } catch (err) {
       console.error("Error triggering run:", err);
       setTriggerStatus("Error");
       setTimeout(() => setTriggerStatus(null), 3000);
       setIsCrawling(false);
+      window.dispatchEvent(new CustomEvent("crawlerStatus", { detail: { isCrawling: false } }));
     }
   };
 

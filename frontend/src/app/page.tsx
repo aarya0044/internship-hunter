@@ -102,6 +102,18 @@ export default function Dashboard() {
     }
   }, [router]);
 
+  // Sync crawling status overlay instantly via Sidebar custom event
+  useEffect(() => {
+    const handleStatusChange = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail && typeof customEvent.detail.isCrawling === "boolean") {
+        setIsCrawling(customEvent.detail.isCrawling);
+      }
+    };
+    window.addEventListener("crawlerStatus", handleStatusChange);
+    return () => window.removeEventListener("crawlerStatus", handleStatusChange);
+  }, []);
+
   // Poll Crawler status to sync loading overlay
   useEffect(() => {
     const token = localStorage.getItem("token");
