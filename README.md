@@ -6,7 +6,7 @@ Built with a modern full-stack architecture featuring a Next.js frontend dashboa
 
 ---
 
-## 🛠️ System Architecture
+##  System Architecture
 
 The application is structured as a multi-tier distributed system:
 
@@ -52,7 +52,7 @@ graph TD
 
 ---
 
-## ✨ Features
+##  Features
 
 *   **🔒 SaaS Multi-User Security**: Full registration, cryptographically secure password hashing (`bcrypt`), and session-guarded access (`JWT tokens`) isolating dashboard data and configs by user ID.
 *   **⚡ Dual-Engine Match Scoring**:
@@ -64,7 +64,7 @@ graph TD
 
 ---
 
-## 🚦 Quickstart Setup
+##  Quickstart Setup
 
 ### Prerequisites
 *   [Docker Desktop](https://www.docker.com/products/docker-desktop/) (running)
@@ -92,7 +92,7 @@ graph TD
 
 ---
 
-## 🎯 Dual-Scoring Engine Details
+##  Dual-Scoring Engine Details
 
 ### 1. Vector Space Model (TF-IDF & Cosine Similarity)
 Implemented in Python without external libraries to show foundational mathematical capabilities. Cosine similarity calculates the angle between the frequency vector of resume terms ($A$) and job description terms ($B$):
@@ -107,7 +107,7 @@ Performs structured analysis returning:
 
 ---
 
-## 🚀 Cloud Production Deployment Guide
+##  Cloud Production Deployment Guide
 
 ### Backend & Celery Worker (Railway/Render)
 1.  Provision a **Redis** instance in one click on Railway.
