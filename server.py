@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from sqlmodel import Session, select, desc
+from apscheduler.schedulers.background import BackgroundScheduler
 import config
 from database import engine
 import database
@@ -174,13 +175,28 @@ def get_profile(user: User = Depends(get_current_user)):
         "exclude_keywords": exclude_keywords,
         "score_threshold": profile.score_threshold,
         "digest_min_score": profile.digest_min_score,
+        "telegram_token": profile.telegram_token,
+        "telegram_chat_id": profile.telegram_chat_id,
+        "subscription_expires_at": profile.subscription_expires_at,
+        "crawl_interval_hours": profile.crawl_interval_hours,
     }
 
 
 @app.post("/api/profile")
 def update_profile(profile: ProfileUpdate, user: User = Depends(get_current_user)):
     """Save/update search boundaries in database."""
-    database.update_user_profile(user.id, profile.model_dump())
+    from datetime import timedelta
+    profile_dict = profile.model_dump()
+    
+    # Calculate subscription expiration date if days specified
+    if profile.subscription_days is not None:
+        if profile.subscription_days > 0:
+            expiry = datetime.now(timezone.utc) + timedelta(days=profile.subscription_days)
+            profile_dict["subscription_expires_at"] = expiry.isoformat()
+        else:
+            profile_dict["subscription_expires_at"] = None
+            
+    database.update_user_profile(user.id, profile_dict)
     return {"status": "success"}
 
 
@@ -280,3 +296,54 @@ def get_tech_insights(user: User = Depends(get_current_user)):
             {"title": "Resume Formatting Tip", "content": "Keep your resume to exactly one page. AI parsers scan top-down and prioritize structured sections over complex graphics.", "category": "Career Tip"},
             {"title": "The Rise of FastAPI", "content": "FastAPI is now one of the most popular Python web frameworks due to its speed, typing validation, and auto-generated OpenAPI documentation.", "category": "Tech News"}
         ]
+
+
+# --- Background Subscriptions Scheduler ---
+
+def run_all_subscribed_crawlers():
+    """Polls database for users with active subscriptions and dispatches crawl tasks to Celery."""
+    from sqlmodel import Session
+    from datetime import datetime, timezone
+    from celery_worker import run_pipeline_task
+    
+    print("[scheduler] Scanning active user crawl subscriptions...")
+    with Session(engine) as session:
+        profiles = session.exec(select(UserProfile)).all()
+        
+    now = datetime.now(timezone.utc)
+    for profile in profiles:
+        if not profile.subscription_expires_at:
+            continue
+            
+        try:
+            # Parse ISO datetime
+            expiry = datetime.fromisoformat(profile.subscription_expires_at.replace("Z", "+00:00"))
+            if expiry < now:
+                print(f"[scheduler] Subscription expired for user {profile.user_id}")
+                continue
+        except Exception as e:
+            print(f"[scheduler] Error parsing subscription expiry for user {profile.user_id}: {e}")
+            continue
+            
+        # Compile profile settings
+        try:
+            profile_dict = {
+                "roles": json.loads(profile.roles) if profile.roles else [],
+                "skills": json.loads(profile.skills) if profile.skills else [],
+                "locations": json.loads(profile.locations) if profile.locations else [],
+                "priority_companies": json.loads(profile.priority_companies) if profile.priority_companies else [],
+                "exclude_keywords": json.loads(profile.exclude_keywords) if profile.exclude_keywords else [],
+                "score_threshold": profile.score_threshold,
+                "digest_min_score": profile.digest_min_score,
+            }
+        except Exception:
+            continue
+            
+        print(f"[scheduler] Dispatching automatic crawl task for user {profile.user_id}")
+        run_pipeline_task.delay(profile.user_id, profile_dict, profile.resume_text or "")
+
+
+# Start Background Scheduler inside FastAPI process
+scheduler = BackgroundScheduler(timezone="UTC")
+scheduler.add_job(run_all_subscribed_crawlers, "interval", hours=4, id="auto_crawls", max_instances=1)
+scheduler.start()

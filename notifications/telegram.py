@@ -10,15 +10,18 @@ import config
 API = "https://api.telegram.org/bot{token}/sendMessage"
 
 
-def send_message(text: str):
-    if not config.TELEGRAM_BOT_TOKEN or not config.TELEGRAM_CHAT_ID:
+def send_message(text: str, custom_token: str = None, custom_chat_id: str = None):
+    token = custom_token or config.TELEGRAM_BOT_TOKEN
+    chat_id = custom_chat_id or config.TELEGRAM_CHAT_ID
+
+    if not token or not chat_id:
         print("[telegram] not configured, skipping send. Message was:\n", text)
         return
 
-    url = API.format(token=config.TELEGRAM_BOT_TOKEN)
+    url = API.format(token=token)
     try:
         resp = requests.post(url, data={
-            "chat_id": config.TELEGRAM_CHAT_ID,
+            "chat_id": chat_id,
             "text": text,
             "parse_mode": "HTML",
             "disable_web_page_preview": True,

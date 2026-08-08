@@ -87,7 +87,15 @@ def run_pipeline(user_id: Optional[int] = None, profile: Optional[dict] = None, 
                 job, result["score"], result["summary"], result["reason"],
                 result["matched_skills"], draft,
             )
-            send_message(msg)
+            
+            # Fetch custom Telegram credentials for this specific user
+            custom_token, custom_chat_id = None, None
+            if user_id is not None:
+                user_prof = database.get_user_profile(user_id)
+                custom_token = user_prof.telegram_token
+                custom_chat_id = user_prof.telegram_chat_id
+                
+            send_message(msg, custom_token=custom_token, custom_chat_id=custom_chat_id)
             database.mark_notified(job_id)
             notified_count += 1
 

@@ -91,6 +91,16 @@ def update_user_profile(user_id: int, profile_data: dict) -> UserProfile:
         profile.score_threshold = profile_data.get("score_threshold", 70)
         profile.digest_min_score = profile_data.get("digest_min_score", 40)
 
+        # Map custom credentials & alert subscriptions
+        if "telegram_token" in profile_data:
+            profile.telegram_token = profile_data["telegram_token"]
+        if "telegram_chat_id" in profile_data:
+            profile.telegram_chat_id = profile_data["telegram_chat_id"]
+        if "subscription_expires_at" in profile_data:
+            profile.subscription_expires_at = profile_data["subscription_expires_at"]
+        if "crawl_interval_hours" in profile_data:
+            profile.crawl_interval_hours = profile_data["crawl_interval_hours"] or 4
+
         session.add(profile)
         session.commit()
         session.refresh(profile)

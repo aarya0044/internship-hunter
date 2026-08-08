@@ -28,6 +28,14 @@ class UserProfile(SQLModel, table=True):
     exclude_keywords: str = Field(default="[]")
     score_threshold: int = Field(default=70)
     digest_min_score: int = Field(default=40)
+    
+    # Custom Telegram configurations
+    telegram_token: Optional[str] = Field(default=None)
+    telegram_chat_id: Optional[str] = Field(default=None)
+    
+    # Alert crawl subscription settings
+    subscription_expires_at: Optional[str] = Field(default=None)
+    crawl_interval_hours: int = Field(default=4)
 
 
 class Job(SQLModel, table=True):
@@ -83,6 +91,10 @@ class ProfileUpdate(BaseModel):
     exclude_keywords: List[str]
     score_threshold: int
     digest_min_score: int
+    telegram_token: Optional[str] = None
+    telegram_chat_id: Optional[str] = None
+    subscription_days: Optional[int] = None
+    crawl_interval_hours: Optional[int] = 4
 
 
 class DraftUpdate(BaseModel):
