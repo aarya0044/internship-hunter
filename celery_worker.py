@@ -5,14 +5,17 @@ import config
 from main import run_pipeline
 
 import ssl
+import re
 
 # Configure secure Redis SSL parameter if using rediss://
 redis_url = config.REDIS_URL
-if "ssl_cert_reqs=none" in redis_url:
-    redis_url = redis_url.replace("ssl_cert_reqs=none", "ssl_cert_reqs=CERT_NONE")
+if "ssl_cert_reqs=" in redis_url.lower():
+    redis_url = re.sub(r"ssl_cert_reqs=[a-zA-Z_]+", "ssl_cert_reqs=CERT_NONE", redis_url, flags=re.IGNORECASE)
 elif redis_url.startswith("rediss://") and "ssl_cert_reqs" not in redis_url:
     separator = "&" if "?" in redis_url else "?"
     redis_url = f"{redis_url}{separator}ssl_cert_reqs=CERT_NONE"
+
+print(f"[celery] Normalized REDIS_URL to: {redis_url}")
 
 # Initialize Celery app
 celery_app = Celery(
