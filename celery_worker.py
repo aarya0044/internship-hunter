@@ -11,11 +11,11 @@ import re
 redis_url = config.REDIS_URL
 print(f"[celery] Normalized REDIS_URL to: {redis_url}")
 
-# Initialize Celery app
+# Initialize Celery app with SQLite results backend to bypass Celery's broken Redis SSL backend parser
 celery_app = Celery(
     "tasks",
     broker=redis_url,
-    backend=redis_url
+    backend=f"db+sqlite:///{config.DATABASE_PATH}"
 )
 
 # Celery Configuration
