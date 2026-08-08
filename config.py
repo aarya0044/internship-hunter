@@ -48,7 +48,7 @@ DAILY_DIGEST_HOUR_UTC = int(os.getenv("DAILY_DIGEST_HOUR_UTC", 14))
 DATABASE_PATH = os.path.join(BASE_DIR, "internship_hunter.db")
 
 # --- Redis Message Broker ---
-REDIS_URL = os.getenv("REDIS_URL", "redis://127.0.0.1:6379/0")
+REDIS_URL = os.getenv("REDIS_URL", "").strip() or "redis://127.0.0.1:6379/0"
 
 
 def validate():
