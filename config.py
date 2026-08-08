@@ -48,7 +48,15 @@ DAILY_DIGEST_HOUR_UTC = int(os.getenv("DAILY_DIGEST_HOUR_UTC", 14))
 DATABASE_PATH = os.path.join(BASE_DIR, "internship_hunter.db")
 
 # --- Redis Message Broker ---
-REDIS_URL = os.getenv("REDIS_URL", "").strip() or "redis://127.0.0.1:6379/0"
+_raw_redis = os.getenv("REDIS_URL", "").strip().strip('"').strip("'")
+if "ssl_cert_reqs=none" in _raw_redis.lower():
+    import re
+    REDIS_URL = re.sub(r"ssl_cert_reqs=[a-zA-Z_]+", "ssl_cert_reqs=CERT_NONE", _raw_redis, flags=re.IGNORECASE)
+elif _raw_redis.startswith("rediss://") and "ssl_cert_reqs" not in _raw_redis:
+    _sep = "&" if "?" in _raw_redis else "?"
+    REDIS_URL = f"{_raw_redis}{_sep}ssl_cert_reqs=CERT_NONE"
+else:
+    REDIS_URL = _raw_redis or "redis://127.0.0.1:6379/0"
 
 
 def validate():
