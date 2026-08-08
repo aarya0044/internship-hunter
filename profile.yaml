@@ -1,0 +1,56 @@
+# Edit this file to match what YOU are looking for.
+# The AI scorer reads this every run - no code changes needed to retune it.
+
+roles:
+  - Software Engineer Intern
+  - Backend Developer Intern
+  - Backend Engineer Intern
+  - Full Stack Intern
+  - AI Intern
+  - Machine Learning Intern
+  - SDE Intern
+
+skills:
+  - Python
+  - FastAPI
+  - Node.js
+  - React
+  - Next.js
+  - Docker
+  - REST APIs
+  - SQL / PostgreSQL
+  - JWT / Auth
+  - CI/CD
+  - AWS
+
+locations:
+  - Remote
+  - India
+  - Hybrid (India)
+
+# Companies that should get a scoring boost if they post a matching role
+priority_companies:
+  - Anthropic
+  - OpenAI
+  - Vercel
+  - Supabase
+  - Linear
+  - Stripe
+  - Cursor
+  - Perplexity
+  - Razorpay
+  - Zerodha
+  - CRED
+  - Postman
+  - Freshworks
+
+# Anything containing these words drops the score sharply (unless you delete this list)
+exclude_keywords:
+  - unpaid
+  - Master's required
+  - PhD required
+  - US Citizenship required
+  - Security Clearance
+
+score_threshold: 70          # >= this => instant Telegram ping
+digest_min_score: 40         # >= this (but below threshold) => shows up in the daily digest

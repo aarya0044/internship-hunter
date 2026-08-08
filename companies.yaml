@@ -1,0 +1,39 @@
+# Company "board slugs" for ATS platforms that expose a public JSON API.
+# These are NOT scraping - they're the same JSON endpoints the company's own
+# careers page calls in the browser, so there's no ToS risk here.
+#
+# How to find a company's slug:
+#   Greenhouse -> open their careers page, look at the URL:
+#                 boards.greenhouse.io/<SLUG>  or job-boards.greenhouse.io/<SLUG>
+#   Lever      -> jobs.lever.co/<SLUG>
+#   Ashby      -> jobs.ashbyhq.com/<SLUG>
+#
+# Add/remove freely. Start small and grow this list over time.
+
+greenhouse:
+  - stripe
+  - airbnb
+  - coinbase
+  - discord
+  - notion
+  - figma
+  - robinhood
+  - doordash
+  - asana
+
+lever:
+  - netflix
+  - shopify
+  - box
+
+ashby:
+  - ramp
+  - linear
+  - vercel
+  - retool
+
+# RemoteOK and WeWorkRemotely need no config - they're queried globally
+# and filtered by keyword/tag automatically.
+
+# The GitHub internship list (SimplifyJobs/Summer2026-Internships) also
+# needs no config - it's parsed in full and filtered by your profile.yaml.

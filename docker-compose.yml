@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:alpine
+    container_name: hunter_redis
+    ports:
+      - "6379:6379"
+    restart: always
+
+  backend:
+    build: .
+    container_name: hunter_backend
+    command: uvicorn server:app --host 0.0.0.0 --port 8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - LLM_PROVIDER=groq
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - GROQ_MODEL=llama-3.3-70b-versatile
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+      - RESUME_PATH=/app/resume.txt
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_PATH=/app/internship_hunter.db
+    depends_on:
+      - redis
+    restart: always
+
+  celery_worker:
+    build: .
+    container_name: hunter_worker
+    # In Linux inside Docker, we run standard worker threads without windows -P solo constraint
+    command: celery -A celery_worker.celery_app worker --loglevel=info
+    volumes:
+      - .:/app
+    environment:
+      - LLM_PROVIDER=groq
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - GROQ_MODEL=llama-3.3-70b-versatile
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+      - RESUME_PATH=/app/resume.txt
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_PATH=/app/internship_hunter.db
+    depends_on:
+      - redis
+      - backend
+    restart: always
+
+  frontend:
+    build: ./frontend
+    container_name: hunter_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    restart: always
