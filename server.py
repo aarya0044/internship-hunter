@@ -226,13 +226,13 @@ active_tasks = {}  # user_id -> celery_task_id
 @app.post("/api/run")
 def trigger_run(user: User = Depends(get_current_user)):
     """Starts the scrapers + AI matching asynchronously in a Celery background worker."""
-    from celery_worker import run_pipeline_task
+    from celery_worker import run_pipeline_task, celery_app
     from celery.result import AsyncResult
     
     # Check if there is already a running task for this user
     active_task_id = active_tasks.get(user.id)
     if active_task_id:
-        res = AsyncResult(active_task_id)
+        res = AsyncResult(active_task_id, app=celery_app)
         if res.state in ("PENDING", "STARTED", "RETRY"):
             return {"status": "ignored", "message": "Pipeline run is already in progress for your account"}
             
@@ -251,12 +251,13 @@ def trigger_run(user: User = Depends(get_current_user)):
 @app.get("/api/status")
 def get_status(user: User = Depends(get_current_user)):
     """Get active pipeline run status for user using Celery AsyncResult."""
+    from celery_worker import celery_app
     from celery.result import AsyncResult
     active_task_id = active_tasks.get(user.id)
     if not active_task_id:
         return {"is_crawling": False}
         
-    res = AsyncResult(active_task_id)
+    res = AsyncResult(active_task_id, app=celery_app)
     is_crawling = res.state in ("PENDING", "STARTED", "RETRY")
     return {"is_crawling": is_crawling}
 
