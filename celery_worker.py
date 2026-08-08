@@ -31,8 +31,8 @@ celery_opts = {
 }
 
 if redis_url.startswith("rediss://"):
-    celery_opts["broker_use_ssl"] = {"ssl_cert_reqs": ssl.CERT_NONE}
-    celery_opts["redis_backend_use_ssl"] = {"ssl_cert_reqs": ssl.CERT_NONE}
+    celery_opts["broker_use_ssl"] = {"ssl_cert_reqs": "CERT_NONE"}
+    celery_opts["redis_backend_use_ssl"] = {"ssl_cert_reqs": "CERT_NONE"}
 
 celery_app.conf.update(**celery_opts)
 
