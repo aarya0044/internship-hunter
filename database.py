@@ -28,8 +28,31 @@ def job_hash(company: str, title: str, url: str) -> str:
 
 
 def init_db():
-    """Initializes tables using SQLModel metadata."""
+    """Initializes tables using SQLModel metadata and runs automatic migration for missing columns."""
     SQLModel.metadata.create_all(engine)
+    
+    # Execute safe ALTER TABLE commands to append new columns to pre-existing tables
+    from sqlalchemy import text
+    with engine.begin() as conn:
+        # Check and add jobs.vector_score if missing from previous database file
+        try:
+            conn.execute(text("ALTER TABLE jobs ADD COLUMN vector_score FLOAT DEFAULT 0.0"))
+            print("[migration] Added vector_score column to jobs table.")
+        except Exception:
+            pass  # already exists
+
+        # Check and add user_profiles new columns if missing
+        for col, col_type in [
+            ("telegram_token", "VARCHAR"),
+            ("telegram_chat_id", "VARCHAR"),
+            ("subscription_expires_at", "VARCHAR"),
+            ("crawl_interval_hours", "INTEGER DEFAULT 4")
+        ]:
+            try:
+                conn.execute(text(f"ALTER TABLE user_profiles ADD COLUMN {col} {col_type}"))
+                print(f"[migration] Added {col} column to user_profiles table.")
+            except Exception:
+                pass  # already exists
 
 
 # --- User & Auth Operations ---
